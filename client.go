@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -80,7 +79,7 @@ func (c *Client) newRequest(path, method string, body interface{}) (*http.Reques
 		bs, _ = json.Marshal(body)
 	}
 
-	data := ioutil.NopCloser(bytes.NewBuffer(bs))
+	data := bytes.NewBuffer(bs)
 	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		return nil, err
