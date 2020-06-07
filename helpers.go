@@ -8,7 +8,7 @@ import (
 type (
 	// Date an alias of time.Time for parsing json dates in the response
 	Date struct {
-		time.Time
+		Time time.Time
 	}
 )
 
