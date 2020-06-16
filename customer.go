@@ -20,7 +20,7 @@ type (
 		// AddressLine2 is the first line of the customer’s address.
 		AddressLine2 string `json:"address_line2"`
 		// AddressLine3 is the first line of the customer’s address.
-		AddressLint3 string `json:"address_line3"`
+		AddressLine3 string `json:"address_line3"`
 		// City is the city of the customer’s address.
 		City string `json:"city"`
 		// CompanyName is the customer’s company name. Required unless a given_name and family_name are provided.
