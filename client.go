@@ -24,13 +24,22 @@ type Client struct {
 	AccessToken string
 	// RemoteURL is the address of the GoCardless API
 	RemoteURL string
+	// httpClient used for APi requests
+	httpClient *http.Client
 }
 
 // NewClient instantiate a client struct with your access token and environment, then
 // use the resource methods to access the API
 func NewClient(accessToken string, env Environment) *Client {
+	return NewClientWithHTTPClient(&http.Client{}, accessToken , env)
+}
+
+// NewClientWithHTTPClient instantiate a client struct with your access token and environment, then
+// use the resource methods to access the API. Uses existing http.Client to allow customisations
+func NewClientWithHTTPClient(hc *http.Client, accessToken string, env Environment) *Client {
 	c := &Client{
 		AccessToken: accessToken,
+		httpClient: hc,
 	}
 
 	switch env {
@@ -50,8 +59,7 @@ func (c *Client) makeRequest(path, method string, body, dst interface{}) error {
 		return err
 	}
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := c.httpClient.Do(req)
 
 	if err != nil {
 		return err
