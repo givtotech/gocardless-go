@@ -39,7 +39,7 @@ type (
 		CreditorID            string `json:"creditor,omitempty"`
 		CustomerID            string `json:"customer,omitempty"`
 		CustomerBankAccountID string `json:"customer_bank_account,omitempty"`
-		NewMandateID          string `json:"new_mandate,omitempty"`
+		MandateID             string `json:"mandate,omitempty"`
 	}
 	// redirectWrapper is a utility struct used to wrap and unwrap the JSON request being passed to the remote API
 	redirectWrapper struct {
