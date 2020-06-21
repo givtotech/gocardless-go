@@ -2,6 +2,7 @@ package gocardless
 
 import (
 	"encoding/json"
+	"context"
 	"fmt"
 	"time"
 )
@@ -68,10 +69,10 @@ func (r *Redirect) AddMetadata(key, value string) {
 // CreateRedirect creates a new redirect object.
 //
 // Relative endpoint: POST /redirect_flows
-func (c *Client) CreateRedirect(redirect *Redirect) error {
+func (c *Client) CreateRedirect(ctx context.Context, redirect *Redirect) error {
 	redirectReq := &redirectWrapper{redirect}
 
-	err := c.post(redirectEndpoint, redirectReq, redirectReq)
+	err := c.post(ctx, redirectEndpoint, redirectReq, redirectReq)
 	if err != nil {
 		return err
 	}
@@ -82,10 +83,10 @@ func (c *Client) CreateRedirect(redirect *Redirect) error {
 // GetRedirect retrieves the details of an existing redirect.
 //
 // Relative endpoint: GET /redirect_flows/RE123
-func (c *Client) GetRedirect(id string) (*Redirect, error) {
+func (c *Client) GetRedirect(ctx context.Context, id string) (*Redirect, error) {
 	wrapper := &redirectWrapper{}
 
-	err := c.get(fmt.Sprintf(`%s/%s`, redirectEndpoint, id), wrapper)
+	err := c.get(ctx, fmt.Sprintf(`%s/%s`, redirectEndpoint, id), wrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +96,7 @@ func (c *Client) GetRedirect(id string) (*Redirect, error) {
 // CompleteRedirect Completes a redirect object. creates a customer, customer bank account, and mandate objects
 //
 // Relative endpoint: POST /redirect_flows/RE123/actions/complete
-func (c *Client) CompleteRedirect(redirect *Redirect) error {
+func (c *Client) CompleteRedirect(ctx context.Context, redirect *Redirect) error {
 	//
 	rdData := map[string]interface{}{
 		"data": map[string]interface{}{
@@ -105,7 +106,7 @@ func (c *Client) CompleteRedirect(redirect *Redirect) error {
 
 	redirectReq := &redirectWrapper{redirect}
 
-	err := c.post(fmt.Sprintf(`%s/%s/actions/complete`, redirectEndpoint, redirect.ID), rdData, redirectReq)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/complete`, redirectEndpoint, redirect.ID), rdData, redirectReq)
 	if err != nil {
 		return err
 	}

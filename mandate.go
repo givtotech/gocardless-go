@@ -2,6 +2,7 @@ package gocardless
 
 import (
 	"encoding/json"
+	"context"
 	"fmt"
 	"time"
 )
@@ -74,10 +75,10 @@ func (m *Mandate) AddMetadata(key, value string) {
 // CreateMandate creates a new mandate object.
 //
 // Relative endpoint: POST /mandates
-func (c *Client) CreateMandate(mandate *Mandate) error {
+func (c *Client) CreateMandate(ctx context.Context, mandate *Mandate) error {
 	mandateReq := &mandateWrapper{mandate}
 
-	err := c.post(mandateEndpoint, mandateReq, mandateReq)
+	err := c.post(ctx, mandateEndpoint, mandateReq, mandateReq)
 	if err != nil {
 		return err
 	}
@@ -88,10 +89,10 @@ func (c *Client) CreateMandate(mandate *Mandate) error {
 // GetMandates returns a cursor-paginated list of your mandates.
 //
 // Relative endpoint: GET /mandates
-func (c *Client) GetMandates() (*MandateListResponse, error) {
+func (c *Client) GetMandates(ctx context.Context) (*MandateListResponse, error) {
 	list := &MandateListResponse{}
 
-	err := c.get(mandateEndpoint, list)
+	err := c.get(ctx, mandateEndpoint, list)
 	if err != nil {
 		return nil, err
 	}
@@ -101,10 +102,10 @@ func (c *Client) GetMandates() (*MandateListResponse, error) {
 // GetMandate retrieves the details of an existing mandate.
 //
 // Relative endpoint: GET /mandates/MD123
-func (c *Client) GetMandate(id string) (*Mandate, error) {
+func (c *Client) GetMandate(ctx context.Context, id string) (*Mandate, error) {
 	wrapper := &mandateWrapper{}
 
-	err := c.get(fmt.Sprintf(`%s/%s`, mandateEndpoint, id), wrapper)
+	err := c.get(ctx, fmt.Sprintf(`%s/%s`, mandateEndpoint, id), wrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +115,7 @@ func (c *Client) GetMandate(id string) (*Mandate, error) {
 // UpdateMandate Updates a mandate object. Supports all of the fields supported when creating a mandate.
 //
 // Relative endpoint: PUT /mandates/MD123
-func (c *Client) UpdateMandate(mandate *Mandate) error {
+func (c *Client) UpdateMandate(ctx context.Context, mandate *Mandate) error {
 	// allows only metadata
 	mdMeta := map[string]interface{}{
 		"mandates": map[string]interface{}{
@@ -124,7 +125,7 @@ func (c *Client) UpdateMandate(mandate *Mandate) error {
 
 	mandateReq := &mandateWrapper{mandate}
 
-	err := c.put(fmt.Sprintf(`%s/%s`, mandateEndpoint, mandate.ID), mdMeta, mandateReq)
+	err := c.put(ctx, fmt.Sprintf(`%s/%s`, mandateEndpoint, mandate.ID), mdMeta, mandateReq)
 	if err != nil {
 		return err
 	}
@@ -134,9 +135,9 @@ func (c *Client) UpdateMandate(mandate *Mandate) error {
 // CancelMandate immediately cancels a mandate and all associated cancellable payments.
 //
 // Relative endpoint: POST /mandates/MD123/actions/cancel
-func (c *Client) CancelMandate(id string) (*Mandate, error) {
+func (c *Client) CancelMandate(ctx context.Context, id string) (*Mandate, error) {
 	wrapper := &mandateWrapper{}
-	err := c.post(fmt.Sprintf(`%s/%s/actions/cancel`, mandateEndpoint, id), nil, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/cancel`, mandateEndpoint, id), nil, wrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -146,9 +147,9 @@ func (c *Client) CancelMandate(id string) (*Mandate, error) {
 // ReinstateMandate Reinstates a cancelled or expired mandate to the banks.
 //
 // Relative endpoint: POST /mandates/MD123/actions/reinstate
-func (c *Client) ReinstateMandate(id string) (*Mandate, error) {
+func (c *Client) ReinstateMandate(ctx context.Context, id string) (*Mandate, error) {
 	wrapper := &mandateWrapper{}
-	err := c.post(fmt.Sprintf(`%s/%s/actions/reinstate`, mandateEndpoint, id), nil, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/reinstate`, mandateEndpoint, id), nil, wrapper)
 	if err != nil {
 		return nil, err
 	}

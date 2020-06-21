@@ -2,6 +2,7 @@ package gocardless
 
 import (
 	"encoding/json"
+	"context"
 	"fmt"
 	"time"
 )
@@ -92,10 +93,10 @@ func (cm *Customer) AddMetadata(key, value string) {
 // CreateCustomer creates a new customer object
 //
 // Relative endpoint: POST /customers
-func (c *Client) CreateCustomer(customer *Customer) error {
+func (c *Client) CreateCustomer(ctx context.Context, customer *Customer) error {
 	customerReq := &customerWrapper{customer}
 
-	err := c.post(customerEndpoint, customerReq, customerReq)
+	err := c.post(ctx, customerEndpoint, customerReq, customerReq)
 	if err != nil {
 		return err
 	}
@@ -106,10 +107,10 @@ func (c *Client) CreateCustomer(customer *Customer) error {
 // GetCustomers returns a cursor-paginated list of your customers.
 //
 // Relative endpoint: GET /customers
-func (c *Client) GetCustomers() (*CustomerListResponse, error) {
+func (c *Client) GetCustomers(ctx context.Context) (*CustomerListResponse, error) {
 	list := &CustomerListResponse{}
 
-	err := c.get(customerEndpoint, list)
+	err := c.get(ctx, customerEndpoint, list)
 	if err != nil {
 		return nil, err
 	}
@@ -119,10 +120,10 @@ func (c *Client) GetCustomers() (*CustomerListResponse, error) {
 // GetCustomer retrieves the details of an existing customer.
 //
 // Relative endpoint: GET /customers/CU123
-func (c *Client) GetCustomer(id string) (*Customer, error) {
+func (c *Client) GetCustomer(ctx context.Context, id string) (*Customer, error) {
 	wrapper := &customerWrapper{}
 
-	err := c.get(fmt.Sprintf(`%s/%s`, customerEndpoint, id), wrapper)
+	err := c.get(ctx, fmt.Sprintf(`%s/%s`, customerEndpoint, id), wrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +133,7 @@ func (c *Client) GetCustomer(id string) (*Customer, error) {
 // UpdateCustomer Updates a customer object. Supports all of the fields supported when creating a customer.
 //
 // Relative endpoint: PUT /customers/CU123
-func (c *Client) UpdateCustomer(customer *Customer) error {
+func (c *Client) UpdateCustomer(ctx context.Context, customer *Customer) error {
 	id := customer.ID
 	// remove unpermitted keys before update
 	customer.ID = ""
@@ -140,7 +141,7 @@ func (c *Client) UpdateCustomer(customer *Customer) error {
 
 	customerReq := &customerWrapper{customer}
 
-	err := c.put(fmt.Sprintf(`%s/%s`, customerEndpoint, id), customerReq, customerReq)
+	err := c.put(ctx, fmt.Sprintf(`%s/%s`, customerEndpoint, id), customerReq, customerReq)
 	if err != nil {
 		return err
 	}

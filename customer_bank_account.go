@@ -2,6 +2,7 @@ package gocardless
 
 import (
 	"encoding/json"
+	"context"
 	"fmt"
 )
 
@@ -85,10 +86,10 @@ func (ca *CustomerBankAccount) AddMetadata(key, value string) {
 // CreateCustomerBankAccount creates a new customer bank account object.
 //
 // Relative endpoint: POST /customer_bank_accounts
-func (c *Client) CreateCustomerBankAccount(cba *CustomerBankAccount) error {
+func (c *Client) CreateCustomerBankAccount(ctx context.Context, cba *CustomerBankAccount) error {
 	cbaReq := &customerBankAccountWrapper{cba}
 
-	err := c.post(bankAccountEndpoint, cbaReq, cbaReq)
+	err := c.post(ctx, bankAccountEndpoint, cbaReq, cbaReq)
 	if err != nil {
 		return err
 	}
@@ -99,10 +100,10 @@ func (c *Client) CreateCustomerBankAccount(cba *CustomerBankAccount) error {
 // GetCustomerBankAccounts returns a cursor-paginated list of your bank accounts.
 //
 // Relative endpoint: GET /customer_bank_accounts
-func (c *Client) GetCustomerBankAccounts() (*CustomerBankAccountListResponse, error) {
+func (c *Client) GetCustomerBankAccounts(ctx context.Context) (*CustomerBankAccountListResponse, error) {
 	list := &CustomerBankAccountListResponse{}
 
-	err := c.get(bankAccountEndpoint, list)
+	err := c.get(ctx, bankAccountEndpoint, list)
 	if err != nil {
 		return nil, err
 	}
@@ -112,10 +113,10 @@ func (c *Client) GetCustomerBankAccounts() (*CustomerBankAccountListResponse, er
 // GetCustomerBankAccount Retrieves the details of an existing bank account.
 //
 // Relative endpoint: GET /customer_bank_accounts/BA123
-func (c *Client) GetCustomerBankAccount(id string) (*CustomerBankAccount, error) {
+func (c *Client) GetCustomerBankAccount(ctx context.Context, id string) (*CustomerBankAccount, error) {
 	wrapper := &customerBankAccountWrapper{}
 
-	err := c.get(fmt.Sprintf(`%s/%s`, bankAccountEndpoint, id), wrapper)
+	err := c.get(ctx, fmt.Sprintf(`%s/%s`, bankAccountEndpoint, id), wrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +126,7 @@ func (c *Client) GetCustomerBankAccount(id string) (*CustomerBankAccount, error)
 // UpdateCustomerBankAccount Updates a customer bank account object. Only the metadata parameter is allowed.
 //
 // Relative endpoint: PUT /customer_bank_accounts/BA123
-func (c *Client) UpdateCustomerBankAccount(cba *CustomerBankAccount) error {
+func (c *Client) UpdateCustomerBankAccount(ctx context.Context, cba *CustomerBankAccount) error {
 	// remove unpermitted keys before update
 	cbaMeta := map[string]interface{}{
 		"customer_bank_accounts": map[string]interface{}{
@@ -134,7 +135,7 @@ func (c *Client) UpdateCustomerBankAccount(cba *CustomerBankAccount) error {
 	}
 	cbaRes := &customerBankAccountWrapper{cba}
 
-	err := c.put(fmt.Sprintf(`%s/%s`, bankAccountEndpoint, cba.ID), cbaMeta, cbaRes)
+	err := c.put(ctx, fmt.Sprintf(`%s/%s`, bankAccountEndpoint, cba.ID), cbaMeta, cbaRes)
 	if err != nil {
 		return err
 	}
@@ -145,9 +146,9 @@ func (c *Client) UpdateCustomerBankAccount(cba *CustomerBankAccount) error {
 // immediately cancels all associated mandates and cancellable payments
 //
 // Relative endpoint: POST /customer_bank_accounts/BA123/actions/disable
-func (c *Client) DisableCustomerBankAccount(id string) (*CustomerBankAccount, error) {
+func (c *Client) DisableCustomerBankAccount(ctx context.Context, id string) (*CustomerBankAccount, error) {
 	wrapper := &customerBankAccountWrapper{}
-	err := c.post(fmt.Sprintf(`%s/%s/actions/disable`, bankAccountEndpoint, id), nil, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/disable`, bankAccountEndpoint, id), nil, wrapper)
 	if err != nil {
 		return nil, err
 	}

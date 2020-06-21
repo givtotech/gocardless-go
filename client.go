@@ -2,6 +2,7 @@ package gocardless
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,7 +32,7 @@ type Client struct {
 // NewClient instantiate a client struct with your access token and environment, then
 // use the resource methods to access the API
 func NewClient(accessToken string, env Environment) *Client {
-	return NewClientWithHTTPClient(&http.Client{}, accessToken , env)
+	return NewClientWithHTTPClient(&http.Client{}, accessToken, env)
 }
 
 // NewClientWithHTTPClient instantiate a client struct with your access token and environment, then
@@ -39,7 +40,7 @@ func NewClient(accessToken string, env Environment) *Client {
 func NewClientWithHTTPClient(hc *http.Client, accessToken string, env Environment) *Client {
 	c := &Client{
 		AccessToken: accessToken,
-		httpClient: hc,
+		httpClient:  hc,
 	}
 
 	switch env {
@@ -53,8 +54,8 @@ func NewClientWithHTTPClient(hc *http.Client, accessToken string, env Environmen
 	return c
 }
 
-func (c *Client) makeRequest(path, method string, body, dst interface{}) error {
-	req, err := c.newRequest(path, method, body)
+func (c *Client) makeRequest(ctx context.Context, path, method string, body, dst interface{}) error {
+	req, err := c.newRequest(ctx, path, method, body)
 	if err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func (c *Client) makeRequest(path, method string, body, dst interface{}) error {
 	return res.bind(dst)
 }
 
-func (c *Client) newRequest(path, method string, body interface{}) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, path string, method string, body interface{}) (*http.Request, error) {
 	if strings.ToUpper(method) == http.MethodPatch {
 		return nil, errors.New(InvalidMethodError)
 	}
@@ -88,7 +89,7 @@ func (c *Client) newRequest(path, method string, body interface{}) (*http.Reques
 	}
 
 	data := bytes.NewBuffer(bs)
-	req, err := http.NewRequest(method, url, data)
+	req, err := http.NewRequestWithContext(ctx, method, url, data)
 	if err != nil {
 		return nil, err
 	}
@@ -113,18 +114,18 @@ func (c *Client) setDefaultHeaders(req *http.Request) {
 	req.Header.Add("Content-Type", "application/json")
 }
 
-func (c *Client) get(path string, dst interface{}) error {
-	return c.makeRequest(path, http.MethodGet, nil, dst)
+func (c *Client) get(ctx context.Context, path string, dst interface{}) error {
+	return c.makeRequest(ctx, path, http.MethodGet, nil, dst)
 }
 
-func (c *Client) post(path string, body, dst interface{}) error {
-	return c.makeRequest(path, http.MethodPost, body, dst)
+func (c *Client) post(ctx context.Context, path string, body, dst interface{}) error {
+	return c.makeRequest(ctx, path, http.MethodPost, body, dst)
 }
 
-func (c *Client) put(path string, body, dst interface{}) error {
-	return c.makeRequest(path, http.MethodPut, body, dst)
+func (c *Client) put(ctx context.Context, path string, body, dst interface{}) error {
+	return c.makeRequest(ctx, path, http.MethodPut, body, dst)
 }
 
-func (c *Client) delete(path string) error {
-	return c.makeRequest(path, http.MethodDelete, nil, nil)
+func (c *Client) delete(ctx context.Context, path string) error {
+	return c.makeRequest(ctx, path, http.MethodDelete, nil, nil)
 }

@@ -2,6 +2,7 @@ package gocardless
 
 import (
 	"encoding/json"
+	"context"
 	"fmt"
 	"time"
 )
@@ -81,10 +82,10 @@ func (p *Payment) AddMetadata(key, value string) {
 // CreatePayment creates a new payment object.
 //
 // Relative endpoint: POST /payments
-func (c *Client) CreatePayment(payment *Payment) error {
+func (c *Client) CreatePayment(ctx context.Context, payment *Payment) error {
 	paymentReq := &paymentWrapper{payment}
 
-	err := c.post(paymentEndpoint, paymentReq, paymentReq)
+	err := c.post(ctx, paymentEndpoint, paymentReq, paymentReq)
 	if err != nil {
 		return err
 	}
@@ -95,10 +96,10 @@ func (c *Client) CreatePayment(payment *Payment) error {
 // GetPayments returns a cursor-paginated list of your payments.
 //
 // Relative endpoint: GET /payments
-func (c *Client) GetPayments() (*PaymentListResponse, error) {
+func (c *Client) GetPayments(ctx context.Context) (*PaymentListResponse, error) {
 	list := &PaymentListResponse{}
 
-	err := c.get(paymentEndpoint, list)
+	err := c.get(ctx, paymentEndpoint, list)
 	if err != nil {
 		return nil, err
 	}
@@ -108,10 +109,10 @@ func (c *Client) GetPayments() (*PaymentListResponse, error) {
 // GetPayment retrieves the details of an existing payment.
 //
 // Relative endpoint: GET /payments/PM123
-func (c *Client) GetPayment(id string) (*Payment, error) {
+func (c *Client) GetPayment(ctx context.Context, id string) (*Payment, error) {
 	wrapper := &paymentWrapper{}
 
-	err := c.get(fmt.Sprintf(`%s/%s`, paymentEndpoint, id), wrapper)
+	err := c.get(ctx, fmt.Sprintf(`%s/%s`, paymentEndpoint, id), wrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +122,7 @@ func (c *Client) GetPayment(id string) (*Payment, error) {
 // UpdatePayment Updates a payment object. Supports all of the fields supported when creating a payment.
 //
 // Relative endpoint: PUT /payments/PM123
-func (c *Client) UpdatePayment(payment *Payment) error {
+func (c *Client) UpdatePayment(ctx context.Context, payment *Payment) error {
 	// allows only metadata
 	paymentMeta := map[string]interface{}{
 		"payments": map[string]interface{}{
@@ -131,7 +132,7 @@ func (c *Client) UpdatePayment(payment *Payment) error {
 
 	paymentReq := &paymentWrapper{payment}
 
-	err := c.put(fmt.Sprintf(`%s/%s`, paymentEndpoint, payment.ID), paymentMeta, paymentReq)
+	err := c.put(ctx, fmt.Sprintf(`%s/%s`, paymentEndpoint, payment.ID), paymentMeta, paymentReq)
 	if err != nil {
 		return err
 	}
@@ -141,7 +142,7 @@ func (c *Client) UpdatePayment(payment *Payment) error {
 // CancelPayment immediately cancels a payment and all associated cancellable payments.
 //
 // Relative endpoint: POST /payments/PM123/actions/cancel
-func (c *Client) CancelPayment(payment *Payment) error {
+func (c *Client) CancelPayment(ctx context.Context, payment *Payment) error {
 	// allows only metadata
 	pMeta := map[string]interface{}{
 		"payments": map[string]interface{}{
@@ -149,7 +150,7 @@ func (c *Client) CancelPayment(payment *Payment) error {
 		},
 	}
 	wrapper := &paymentWrapper{payment}
-	err := c.post(fmt.Sprintf(`%s/%s/actions/cancel`, paymentEndpoint, payment.ID), pMeta, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/cancel`, paymentEndpoint, payment.ID), pMeta, wrapper)
 	if err != nil {
 		return err
 	}
@@ -159,7 +160,7 @@ func (c *Client) CancelPayment(payment *Payment) error {
 // RetryPayment Retries a failed payment if the underlying mandate is active.
 //
 // Relative endpoint: POST /payments/PM123/actions/retry
-func (c *Client) RetryPayment(payment *Payment) error {
+func (c *Client) RetryPayment(ctx context.Context, payment *Payment) error {
 	// allows only metadata
 	pMeta := map[string]interface{}{
 		"payments": map[string]interface{}{
@@ -167,7 +168,7 @@ func (c *Client) RetryPayment(payment *Payment) error {
 		},
 	}
 	wrapper := &paymentWrapper{payment}
-	err := c.post(fmt.Sprintf(`%s/%s/actions/retry`, paymentEndpoint, payment.ID), pMeta, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/retry`, paymentEndpoint, payment.ID), pMeta, wrapper)
 	if err != nil {
 		return err
 	}

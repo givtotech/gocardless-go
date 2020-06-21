@@ -2,6 +2,7 @@ package gocardless
 
 import (
 	"encoding/json"
+	"context"
 	"fmt"
 	"time"
 )
@@ -99,10 +100,10 @@ func (s *Subscription) AddMetadata(key, value string) {
 // CreateSubscription creates a new subscription object.
 //
 // Relative endpoint: POST /subscriptions
-func (c *Client) CreateSubscription(subscription *Subscription) error {
+func (c *Client) CreateSubscription(ctx context.Context, subscription *Subscription) error {
 	subscriptionReq := &subscriptionWrapper{subscription}
 
-	err := c.post(subscriptionEndpoint, subscriptionReq, subscriptionReq)
+	err := c.post(ctx, subscriptionEndpoint, subscriptionReq, subscriptionReq)
 	if err != nil {
 		return err
 	}
@@ -113,10 +114,10 @@ func (c *Client) CreateSubscription(subscription *Subscription) error {
 // GetSubscriptions returns a cursor-paginated list of your subscriptions.
 //
 // Relative endpoint: GET /subscriptions
-func (c *Client) GetSubscriptions() (*SubscriptionListResponse, error) {
+func (c *Client) GetSubscriptions(ctx context.Context) (*SubscriptionListResponse, error) {
 	list := &SubscriptionListResponse{}
 
-	err := c.get(subscriptionEndpoint, list)
+	err := c.get(ctx, subscriptionEndpoint, list)
 	if err != nil {
 		return nil, err
 	}
@@ -126,10 +127,10 @@ func (c *Client) GetSubscriptions() (*SubscriptionListResponse, error) {
 // GetSubscription retrieves the details of an existing subscription.
 //
 // Relative endpoint: GET /subscriptions/SB123
-func (c *Client) GetSubscription(id string) (*Subscription, error) {
+func (c *Client) GetSubscription(ctx context.Context, id string) (*Subscription, error) {
 	wrapper := &subscriptionWrapper{}
 
-	err := c.get(fmt.Sprintf(`%s/%s`, subscriptionEndpoint, id), wrapper)
+	err := c.get(ctx, fmt.Sprintf(`%s/%s`, subscriptionEndpoint, id), wrapper)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (c *Client) GetSubscription(id string) (*Subscription, error) {
 // UpdateSubscription Updates a sSubscription object. Supports all of the fields supported when creating a subscription.
 //
 // Relative endpoint: PUT /subscriptions/SB123
-func (c *Client) UpdateSubscription(subscription *Subscription) error {
+func (c *Client) UpdateSubscription(ctx context.Context, subscription *Subscription) error {
 	// allows only metadata
 	subscriptionMeta := map[string]interface{}{
 		"subscriptions": map[string]interface{}{
@@ -149,7 +150,7 @@ func (c *Client) UpdateSubscription(subscription *Subscription) error {
 
 	subscriptionReq := &subscriptionWrapper{subscription}
 
-	err := c.put(fmt.Sprintf(`%s/%s`, subscriptionEndpoint, subscription.ID), subscriptionMeta, subscriptionReq)
+	err := c.put(ctx, fmt.Sprintf(`%s/%s`, subscriptionEndpoint, subscription.ID), subscriptionMeta, subscriptionReq)
 	if err != nil {
 		return err
 	}
@@ -159,7 +160,7 @@ func (c *Client) UpdateSubscription(subscription *Subscription) error {
 // CancelSubscription immediately cancels a subscription.
 //
 // Relative endpoint: POST /subscriptions/SU123/actions/cancel
-func (c *Client) CancelSubscription(subscription *Subscription) error {
+func (c *Client) CancelSubscription(ctx context.Context, subscription *Subscription) error {
 	// allows only metadata
 	subscriptionMeta := map[string]interface{}{
 		"subscriptions": map[string]interface{}{
@@ -169,7 +170,7 @@ func (c *Client) CancelSubscription(subscription *Subscription) error {
 
 	wrapper := &subscriptionWrapper{subscription}
 
-	err := c.post(fmt.Sprintf(`%s/%s/actions/cancel`, subscriptionEndpoint, subscription.ID), subscriptionMeta, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/cancel`, subscriptionEndpoint, subscription.ID), subscriptionMeta, wrapper)
 	if err != nil {
 		return err
 	}
@@ -179,7 +180,7 @@ func (c *Client) CancelSubscription(subscription *Subscription) error {
 // PauseSubscription pauses a active subscription
 //
 // Relative endpoint: POST /subscriptions/SU123/actions/pause
-func (c *Client) PauseSubscription(subscription *Subscription) error {
+func (c *Client) PauseSubscription(ctx context.Context, subscription *Subscription) error {
 	// allows only metadata
 	subscriptionMeta := map[string]interface{}{
 		"subscriptions": map[string]interface{}{
@@ -188,7 +189,7 @@ func (c *Client) PauseSubscription(subscription *Subscription) error {
 	}
 
 	wrapper := &subscriptionWrapper{subscription}
-	err := c.post(fmt.Sprintf(`%s/%s/actions/pause`, subscriptionEndpoint, subscription.ID), subscriptionMeta, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/pause`, subscriptionEndpoint, subscription.ID), subscriptionMeta, wrapper)
 	if err != nil {
 		return err
 	}
@@ -198,7 +199,7 @@ func (c *Client) PauseSubscription(subscription *Subscription) error {
 // ResumeSubscription resumes a paused subscription
 //
 // Relative endpoint: POST /subscriptions/SU123/actions/resume
-func (c *Client) ResumeSubscription(subscription *Subscription) error {
+func (c *Client) ResumeSubscription(ctx context.Context, subscription *Subscription) error {
 	// allows only metadata
 	subscriptionMeta := map[string]interface{}{
 		"subscriptions": map[string]interface{}{
@@ -207,7 +208,7 @@ func (c *Client) ResumeSubscription(subscription *Subscription) error {
 	}
 
 	wrapper := &subscriptionWrapper{subscription}
-	err := c.post(fmt.Sprintf(`%s/%s/actions/resume`, subscriptionEndpoint, subscription.ID), subscriptionMeta, wrapper)
+	err := c.post(ctx, fmt.Sprintf(`%s/%s/actions/resume`, subscriptionEndpoint, subscription.ID), subscriptionMeta, wrapper)
 	if err != nil {
 		return err
 	}
